@@ -408,9 +408,9 @@ letterContent.innerHTML = `
     <h2 style="font-style: italic; margin-bottom: 20px; font-size: 28px; color: #b56576;">My Dearest, Ria</h2>
     
     <p style="font-size: 18px; line-height: 1.6; margin-bottom: 15px;">
-        Happy 1st anniversary! I can't believe it how we're always together since our first date. I can still remember how I'm feeling that day—the nervousness and the excitement. Though, you teased me a lot :<
-        But I'm thankful enough to say that thank you for having the courage to be with me all the time. Thank you for staying and having the patience for loving me. Thank you for existing in this world. I didn't know I needed someone this deep and I'm glad it's you.
-        I don't know where this leads us but I hope you'll stay with me and I'll keep you safe despite all.
+        Happy 1st anniversary! I can't believe it how we're always together since our first date. I can still remember how I was feeling that day—the nervousness and the excitement. Though you teased me a lot :<
+        But I'm thankful enough to say thank you for having the courage to be with me all the time. Thank you for staying and having the patience for loving me. Thank you for existing in this world. I didn't know I needed someone this deep and I'm glad it's you.
+        I don't know where this leads us, but I hope you'll stay with me, and I'll keep you safe despite all.
     </p>
     
     <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">

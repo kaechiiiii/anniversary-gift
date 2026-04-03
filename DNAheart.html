@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 1st Anniversary!</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; 
+            background-color: black; 
+            font-family: 'Times New Roman', Times, serif;
+        }
+        canvas {
+            display: block;
+        }
+
+        /* The button on the heart screen to open the gallery */
+        #enter-gallery-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            font-size: 20px;
+            font-family: inherit;
+            background-color: transparent;
+            color: rgba(255, 216, 131, 0.9);
+            border: 1px solid rgba(255, 216, 131, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 10;
+            transition: 0.3s;
+        }
+        #enter-gallery-btn:hover {
+            background-color: rgba(255, 216, 131, 0.2);
+        }
+
+        /* The gallery container (hidden by default) */
+        #gallery-container {
+            display: none; /* Hidden until button is clicked */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        /* Styling for the pictures and text */
+        .gallery-card {
+            text-align: center;
+            max-width: 90%;
+        }
+        .gallery-card img {
+            max-width: 100%;
+            max-height: 60vh;
+            border: 4px solid rgba(255, 216, 131, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 216, 131, 0.3);
+        }
+        .gallery-card p {
+            font-size: 28px;
+            font-style: italic;
+            color: rgba(255, 216, 131, 0.9);
+            margin: 25px 0;
+        }
+
+        /* Gallery navigation buttons */
+        .btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: inherit;
+            background: none;
+            border: 1px solid rgba(255, 216, 131, 0.8);
+            color: rgba(255, 216, 131, 0.9);
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: rgba(255, 216, 131, 0.2);
+        }
+        #back-btn {
+            margin-top: 30px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border: none;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <audio id="bg-music" loop>
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="heart"></canvas>
+    <button id="enter-gallery-btn">View Our Goofy Moments ❤️</button>
+
+    <div id="gallery-container">
+        <div class="gallery-card">
+            <img id="gallery-img" src="" alt="Our Memory">
+            <p id="gallery-desc"></p>
+            <div class="gallery-controls">
+                <button class="btn" id="prev-btn">◀ Previous</button>
+                <button class="btn" id="next-btn">Next ▶</button>
+            </div>
+            <button class="btn" id="back-btn">Back to Animation</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

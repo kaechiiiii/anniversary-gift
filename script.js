@@ -45,6 +45,8 @@ var init = function () {
         height = canvas.height = koef * window.innerHeight; 
         ctx.fillStyle = "rgba(0,0,0,1)";
         ctx.fillRect(0, 0, width, height);
+        initCanvasStars();
+        initFog();
     });
 
     var traceCount = mobile ? 20 : 50;
@@ -88,6 +90,42 @@ var init = function () {
         timeDelta: 0.01
     };
 
+    var canvasStars = [];
+    var numCanvasStars = mobile ? 40 : 80; 
+
+    var initCanvasStars = function() {
+        canvasStars = [];
+        for (i = 0; i < numCanvasStars; i++) {
+            canvasStars.push({
+                x: rand() * width,
+                y: rand() * height,
+                size: rand() * 4 + 3, 
+                alpha: rand(), 
+                maxAlpha: 0.6 + rand() * 0.4, 
+                flashSpeed: 0.01 + rand() * 0.02, 
+                goingUp: rand() > 0.5 
+            });
+        }
+    };
+    initCanvasStars(); 
+
+    var canvasFog = [];
+    var numFog = mobile ? 4 : 8; 
+
+    var initFog = function() {
+        canvasFog = [];
+        for (i = 0; i < numFog; i++) {
+            canvasFog.push({
+                x: rand() * width,
+                y: rand() * height,
+                vx: (rand() - 0.5) * 0.8, 
+                vy: (rand() - 0.5) * 0.8,
+                r: rand() * 300 + 200 
+            });
+        }
+    };
+    initFog();
+
     var time = 0;
     var textAlpha = 0; 
 
@@ -95,8 +133,57 @@ var init = function () {
         var n = -Math.cos(time);
         pulse((1 + n) * .5, (1 + n) * .5);
         time += ((Math.sin(time)) < 0 ? 9 : (n > 0.8) ? .2 : 1) * config.timeDelta;
+        
         ctx.fillStyle = "rgba(0,0,0,.1)";
         ctx.fillRect(0, 0, width, height);
+
+        for (i = 0; i < canvasFog.length; i++) {
+            var fog = canvasFog[i];
+            fog.x += fog.vx;
+            fog.y += fog.vy;
+            
+            if (fog.x < -fog.r) fog.x = width + fog.r;
+            if (fog.x > width + fog.r) fog.x = -fog.r;
+            if (fog.y < -fog.r) fog.y = height + fog.r;
+            if (fog.y > height + fog.r) fog.y = -fog.r;
+            
+            var grad = ctx.createRadialGradient(fog.x, fog.y, 0, fog.x, fog.y, fog.r);
+            grad.addColorStop(0, "rgba(255, 180, 200, 0.04)"); 
+            grad.addColorStop(1, "rgba(255, 180, 200, 0)"); 
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        for (i = 0; i < canvasStars.length; i++) {
+            var star = canvasStars[i];
+
+            if (star.goingUp) {
+                star.alpha += star.flashSpeed;
+                if (star.alpha >= star.maxAlpha) star.goingUp = false;
+            } else {
+                star.alpha -= star.flashSpeed;
+                if (star.alpha <= 0) {
+                    star.alpha = 0;
+                    star.goingUp = true;
+                }
+            }
+
+            ctx.save();
+            ctx.translate(star.x, star.y);
+            ctx.beginPath();
+            ctx.moveTo(0, -star.size);
+            ctx.quadraticCurveTo(0, 0, star.size, 0);
+            ctx.quadraticCurveTo(0, 0, 0, star.size);
+            ctx.quadraticCurveTo(0, 0, -star.size, 0);
+            ctx.quadraticCurveTo(0, 0, 0, -star.size);
+            ctx.fillStyle = "rgba(255, 216, 131, " + star.alpha + ")";
+            ctx.fill();
+            ctx.restore();
+        }
+
         for (i = e.length; i--;) {
             var u = e[i];
             var q = targetPoints[u.q];
@@ -136,10 +223,6 @@ var init = function () {
             }
         }
 
-        // ==========================================
-        // TEXT RENDERING INSIDE THE ANIMATION
-        // ==========================================
-        
         if (textAlpha < 0.9) {
             textAlpha += 0.002; 
         }
@@ -157,7 +240,6 @@ var init = function () {
         ctx.font = "italic 24px Times New Roman"; 
         ctx.textAlign = "left"; 
         ctx.fillText("I love you so much!", (width / 2) + 350, (height / 2) + 50);
-        // ==========================================
 
         window.requestAnimationFrame(loop, canvas);
     };
@@ -201,26 +283,24 @@ const galleryDesc = document.getElementById('gallery-desc');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 
-// Add smooth CSS transitions to the images and text
 if (galleryImg) galleryImg.style.transition = "opacity 0.3s ease-in-out";
 if (galleryDesc) galleryDesc.style.transition = "opacity 0.3s ease-in-out";
 
-// --- GLITTER CREATION FUNCTION ---
 function createGlitter() {
     const style = document.createElement('style');
     style.innerHTML = `
         .glitter-star {
             position: absolute;
             background-color: white;
-            box-shadow: 0 0 6px rgba(255, 216, 131, 0.9); /* Warm golden glow */
+            box-shadow: 0 0 6px rgba(255, 216, 131, 0.9); 
             border-radius: 50%;
-            pointer-events: none; /* So you can still click the buttons behind them */
+            pointer-events: none; 
             animation: twinkle infinite ease-in-out;
-            z-index: 1; /* Puts glitter in the background */
+            z-index: 1; 
         }
         .gallery-card {
             position: relative;
-            z-index: 10; /* Ensures the pictures and text sit above the glitter */
+            z-index: 10; 
         }
         @keyframes twinkle {
             0%, 100% { opacity: 0; transform: scale(0.5); }
@@ -230,30 +310,21 @@ function createGlitter() {
     document.head.appendChild(style);
 
     if (galleryContainer) {
-        // Create 150 little glitter dots
         for (let i = 0; i < 150; i++) {
             let star = document.createElement('div');
             star.className = 'glitter-star';
-            
-            // Randomize position across the whole screen
             star.style.left = Math.random() * 100 + 'vw';
             star.style.top = Math.random() * 100 + 'vh';
-            
-            // Randomize size from 1px to 3px
             let size = Math.random() * 2 + 1 + 'px';
             star.style.width = size;
             star.style.height = size;
-            
-            // Randomize twinkling speed and delay so they don't all blink at once
             star.style.animationDuration = Math.random() * 3 + 2 + 's';
             star.style.animationDelay = Math.random() * 5 + 's';
-            
             galleryContainer.appendChild(star);
         }
     }
 }
 createGlitter();
-// ---------------------------------
 
 function updateGallery() {
     if (galleryImg) galleryImg.style.opacity = 0;
@@ -268,11 +339,130 @@ function updateGallery() {
     }, 300);
 }
 
+// ==========================================
+// ROMANTIC LETTER CREATION (NO HTML CHANGES NEEDED!)
+// ==========================================
+
+// 1. Create the button to open the letter
+const letterBtn = document.createElement('button');
+letterBtn.innerText = "Read My Letter 💌";
+letterBtn.style.position = 'absolute';
+letterBtn.style.bottom = '12%'; // Sits just above/below your Enter Gallery button
+letterBtn.style.left = '50%';
+letterBtn.style.transform = 'translateX(-50%)';
+letterBtn.style.padding = '12px 24px';
+letterBtn.style.fontSize = '18px';
+letterBtn.style.fontFamily = '"Times New Roman", serif';
+letterBtn.style.background = 'rgba(255, 216, 131, 0.15)';
+letterBtn.style.color = '#ffd883';
+letterBtn.style.border = '1px solid #ffd883';
+letterBtn.style.borderRadius = '30px';
+letterBtn.style.cursor = 'pointer';
+letterBtn.style.zIndex = '100';
+letterBtn.style.transition = 'all 0.3s ease';
+
+letterBtn.onmouseover = () => {
+    letterBtn.style.background = 'rgba(255, 216, 131, 0.4)';
+    letterBtn.style.color = '#fff';
+};
+letterBtn.onmouseout = () => {
+    letterBtn.style.background = 'rgba(255, 216, 131, 0.15)';
+    letterBtn.style.color = '#ffd883';
+};
+document.body.appendChild(letterBtn);
+
+// 2. Create the hidden overlay for the letter
+const letterModal = document.createElement('div');
+letterModal.style.position = 'fixed';
+letterModal.style.top = '0';
+letterModal.style.left = '0';
+letterModal.style.width = '100vw';
+letterModal.style.height = '100vh';
+letterModal.style.background = 'rgba(0, 0, 0, 0.85)'; // Dark romantic background
+letterModal.style.zIndex = '200';
+letterModal.style.display = 'none'; 
+letterModal.style.justifyContent = 'center';
+letterModal.style.alignItems = 'center';
+letterModal.style.opacity = '0';
+letterModal.style.transition = 'opacity 0.5s ease';
+
+// 3. Create the paper design
+const letterContent = document.createElement('div');
+letterContent.style.background = '#fdfbfb'; 
+letterContent.style.padding = '40px';
+letterContent.style.borderRadius = '15px';
+letterContent.style.maxWidth = '500px';
+letterContent.style.width = '85%';
+letterContent.style.textAlign = 'center';
+letterContent.style.fontFamily = '"Times New Roman", serif';
+letterContent.style.color = '#333';
+letterContent.style.boxShadow = '0 0 30px rgba(255, 216, 131, 0.4)';
+letterContent.style.transform = 'scale(0.8)';
+letterContent.style.transition = 'transform 0.5s ease';
+
+// ---------------------------------------------------------
+// *** EDIT YOUR LETTER HERE ***
+// Just change the text between the <p> and </p> tags!
+// ---------------------------------------------------------
+letterContent.innerHTML = `
+    <h2 style="font-style: italic; margin-bottom: 20px; font-size: 28px; color: #b56576;">My Dearest, Ria</h2>
+    
+    <p style="font-size: 18px; line-height: 1.6; margin-bottom: 15px;">
+        Happy 1st anniversary! I can't believe it how we're always together since our first date. I can still remember how I'm feeling that day—the nervousness and the excitement. Though, you teased me a lot :<
+        But I'm thankful enough to say that thank you for having the courage to be with me all the time. Thank you for staying and having the patience for loving me. Thank you for existing in this world. I didn't know I needed someone this deep and I'm glad it's you.
+        I don't know where this leads us but I hope you'll stay with me and I'll keep you safe despite all.
+    </p>
+    
+    <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">
+        I love you endlessly, completely, and with every piece of who I am.
+    </p>
+`;
+// ---------------------------------------------------------
+
+// 4. Create the close button
+const closeLetterBtn = document.createElement('button');
+closeLetterBtn.innerText = "Close Letter";
+closeLetterBtn.style.padding = '10px 25px';
+closeLetterBtn.style.fontSize = '16px';
+closeLetterBtn.style.fontFamily = '"Times New Roman", serif';
+closeLetterBtn.style.background = '#b56576';
+closeLetterBtn.style.color = 'white';
+closeLetterBtn.style.border = 'none';
+closeLetterBtn.style.borderRadius = '20px';
+closeLetterBtn.style.cursor = 'pointer';
+
+letterContent.appendChild(closeLetterBtn);
+letterModal.appendChild(letterContent);
+document.body.appendChild(letterModal);
+
+// 5. Make the buttons actually work
+letterBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    letterModal.style.display = 'flex';
+    setTimeout(() => {
+        letterModal.style.opacity = '1';
+        letterContent.style.transform = 'scale(1)';
+    }, 10);
+});
+
+closeLetterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    letterModal.style.opacity = '0';
+    letterContent.style.transform = 'scale(0.8)';
+    setTimeout(() => {
+        letterModal.style.display = 'none';
+    }, 500);
+});
+
+// ==========================================
+// BUTTON LOGIC FOR GALLERY TRANSITIONS
+// ==========================================
 if (enterBtn) {
     enterBtn.addEventListener('click', (e) => {
         e.stopPropagation(); 
         heartCanvas.style.display = 'none';
         enterBtn.style.display = 'none';
+        letterBtn.style.display = 'none'; // Hides the letter button when going to gallery
         galleryContainer.style.display = 'flex';
         
         if (galleryImg) galleryImg.style.opacity = 0;
@@ -286,6 +476,7 @@ if (backBtn) {
         galleryContainer.style.display = 'none';
         heartCanvas.style.display = 'block';
         enterBtn.style.display = 'block';
+        letterBtn.style.display = 'block'; // Brings the letter button back
     });
 }
 
